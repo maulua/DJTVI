@@ -1,0 +1,219 @@
+<RCC>
+    <qresource prefix="/new/mainwindow">
+        <file>icon/3d bar chart.ico</file>
+        <file>icon/abort.ico</file>
+        <file>icon/about.ico</file>
+        <file>icon/Add Bookmark.ico</file>
+        <file>icon/Add Card.ico</file>
+        <file>icon/Add Folder.ico</file>
+        <file>icon/Add Separator.ico</file>
+        <file>icon/Add Tab.ico</file>
+        <file>icon/Add to Favourites.ico</file>
+        <file>icon/Add Window 1.ico</file>
+        <file>icon/Add Window 2.ico</file>
+        <file>icon/add.ico</file>
+        <file>icon/Address Book.ico</file>
+        <file>icon/Advanced Options.ico</file>
+        <file>icon/Anchor.ico</file>
+        <file>icon/application.ico</file>
+        <file>icon/apply.ico</file>
+        <file>icon/Attach.ico</file>
+        <file>icon/Back - Previous.ico</file>
+        <file>icon/Back 2.ico</file>
+        <file>icon/back.ico</file>
+        <file>icon/bad mark.ico</file>
+        <file>icon/Block Junk Mail.ico</file>
+        <file>icon/blue key.ico</file>
+        <file>icon/blue tag.ico</file>
+        <file>icon/Bookmarks 1.ico</file>
+        <file>icon/Bookmarks 2.ico</file>
+        <file>icon/Bookmarks 3.ico</file>
+        <file>icon/Bookmarks 4.ico</file>
+        <file>icon/boss.ico</file>
+        <file>icon/bottom.ico</file>
+        <file>icon/Browse 1.ico</file>
+        <file>icon/Browse 2.ico</file>
+        <file>icon/Browse 3.ico</file>
+        <file>icon/calculator.ico</file>
+        <file>icon/Calendar Day.ico</file>
+        <file>icon/Calendar Month.ico</file>
+        <file>icon/Calendar Multiweek.ico</file>
+        <file>icon/Calendar Week.ico</file>
+        <file>icon/calendar.ico</file>
+        <file>icon/car key.ico</file>
+        <file>icon/CD.ico</file>
+        <file>icon/Chat 2.ico</file>
+        <file>icon/Chat.ico</file>
+        <file>icon/clipboard.ico</file>
+        <file>icon/clock.ico</file>
+        <file>icon/close.ico</file>
+        <file>icon/compass.ico</file>
+        <file>icon/component.ico</file>
+        <file>icon/Contacts.ico</file>
+        <file>icon/Copy.ico</file>
+        <file>icon/create.ico</file>
+        <file>icon/Cut.ico</file>
+        <file>icon/danger.ico</file>
+        <file>icon/database.ico</file>
+        <file>icon/Delete.ico</file>
+        <file>icon/delivery.ico</file>
+        <file>icon/dial.ico</file>
+        <file>icon/disaster.ico</file>
+        <file>icon/dollar.ico</file>
+        <file>icon/down.ico</file>
+        <file>icon/Download.ico</file>
+        <file>icon/eject.ico</file>
+        <file>icon/Email App Icon.ico</file>
+        <file>icon/Email Display.ico</file>
+        <file>icon/Email Envelope.ico</file>
+        <file>icon/e-mail.ico</file>
+        <file>icon/erase.ico</file>
+        <file>icon/error.ico</file>
+        <file>icon/euro.ico</file>
+        <file>icon/exit.ico</file>
+        <file>icon/Extensions.ico</file>
+        <file>icon/fall.ico</file>
+        <file>icon/fast-forward.ico</file>
+        <file>icon/Favourites.ico</file>
+        <file>icon/female.ico</file>
+        <file>icon/File.ico</file>
+        <file>icon/filter.ico</file>
+        <file>icon/find.ico</file>
+        <file>icon/first record.ico</file>
+        <file>icon/first.ico</file>
+        <file>icon/flag.ico</file>
+        <file>icon/folder.ico</file>
+        <file>icon/Fonts 1.ico</file>
+        <file>icon/Fonts 2.ico</file>
+        <file>icon/forbidden.ico</file>
+        <file>icon/Forward - Next.ico</file>
+        <file>icon/Forward 2.ico</file>
+        <file>icon/Forward Email.ico</file>
+        <file>icon/forward.ico</file>
+        <file>icon/free bsd.ico</file>
+        <file>icon/General Options.ico</file>
+        <file>icon/Get Mail.ico</file>
+        <file>icon/go back.ico</file>
+        <file>icon/go forward.ico</file>
+        <file>icon/Go.ico</file>
+        <file>icon/good-mark.ico</file>
+        <file>icon/green tag.ico</file>
+        <file>icon/H. Line.ico</file>
+        <file>icon/heart.ico</file>
+        <file>icon/help book 3d.ico</file>
+        <file>icon/help book.ico</file>
+        <file>icon/help.ico</file>
+        <file>icon/hint.ico</file>
+        <file>icon/home.ico</file>
+        <file>icon/how-to.ico</file>
+        <file>icon/hungup.ico</file>
+        <file>icon/info.ico</file>
+        <file>icon/key.ico</file>
+        <file>icon/last recor.ico</file>
+        <file>icon/last.ico</file>
+        <file>icon/left-right.ico</file>
+        <file>icon/lightning.ico</file>
+        <file>icon/Link.ico</file>
+        <file>icon/linux.ico</file>
+        <file>icon/List.ico</file>
+        <file>icon/load.ico</file>
+        <file>icon/lock.ico</file>
+        <file>icon/low rating.ico</file>
+        <file>icon/mail.ico</file>
+        <file>icon/male.ico</file>
+        <file>icon/medium rating.ico</file>
+        <file>icon/message.ico</file>
+        <file>icon/mobile-phone.ico</file>
+        <file>icon/modify.ico</file>
+        <file>icon/Move.ico</file>
+        <file>icon/movie.ico</file>
+        <file>icon/music.ico</file>
+        <file>icon/New Doc.ico</file>
+        <file>icon/new document.ico</file>
+        <file>icon/New Folder.ico</file>
+        <file>icon/New Window.ico</file>
+        <file>icon/new.ico</file>
+        <file>icon/next track.ico</file>
+        <file>icon/next.ico</file>
+        <file>icon/no.ico</file>
+        <file>icon/no-entry.ico</file>
+        <file>icon/notes.ico</file>
+        <file>icon/OK.ico</file>
+        <file>icon/Paste.ico</file>
+        <file>icon/pause.ico</file>
+        <file>icon/people.ico</file>
+        <file>icon/person.ico</file>
+        <file>icon/phone number.ico</file>
+        <file>icon/pie chart.ico</file>
+        <file>icon/pinion.ico</file>
+        <file>icon/play.ico</file>
+        <file>icon/playback.ico</file>
+        <file>icon/play-music.ico</file>
+        <file>icon/previous record.ico</file>
+        <file>icon/previous.ico</file>
+        <file>icon/Print.ico</file>
+        <file>icon/problem.ico</file>
+        <file>icon/Properties.ico</file>
+        <file>icon/Publish.ico</file>
+        <file>icon/question.ico</file>
+        <file>icon/Quote 2.ico</file>
+        <file>icon/Quote.ico</file>
+        <file>icon/raise.ico</file>
+        <file>icon/record.ico</file>
+        <file>icon/red mark.ico</file>
+        <file>icon/red star.ico</file>
+        <file>icon/red tag.ico</file>
+        <file>icon/redo.ico</file>
+        <file>icon/Refresh.ico</file>
+        <file>icon/remove.ico</file>
+        <file>icon/Rename - Edit.ico</file>
+        <file>icon/repair.ico</file>
+        <file>icon/Reply to All.ico</file>
+        <file>icon/Reply.ico</file>
+        <file>icon/report.ico</file>
+        <file>icon/retort.ico</file>
+        <file>icon/rewind.ico</file>
+        <file>icon/sad.ico</file>
+        <file>icon/Save.ico</file>
+        <file>icon/Search.ico</file>
+        <file>icon/Security.ico</file>
+        <file>icon/Send 2.ico</file>
+        <file>icon/Send Later.ico</file>
+        <file>icon/Send.ico</file>
+        <file>icon/shopping cart.ico</file>
+        <file>icon/smile.ico</file>
+        <file>icon/sound.ico</file>
+        <file>icon/Spell.ico</file>
+        <file>icon/Stop 2.ico</file>
+        <file>icon/stop sign.ico</file>
+        <file>icon/Stop.ico</file>
+        <file>icon/sync.ico</file>
+        <file>icon/Table 1.ico</file>
+        <file>icon/table.ico</file>
+        <file>icon/target.ico</file>
+        <file>icon/taxi.ico</file>
+        <file>icon/terminate.ico</file>
+        <file>icon/text preview.ico</file>
+        <file>icon/text.ico</file>
+        <file>icon/Themes 2.ico</file>
+        <file>icon/Themes.ico</file>
+        <file>icon/thumbs down.ico</file>
+        <file>icon/thumbs up.ico</file>
+        <file>icon/top.ico</file>
+        <file>icon/turn off.ico</file>
+        <file>icon/undo.ico</file>
+        <file>icon/unlock.ico</file>
+        <file>icon/up.ico</file>
+        <file>icon/update.ico</file>
+        <file>icon/up-down.ico</file>
+        <file>icon/upload.ico</file>
+        <file>icon/user group.ico</file>
+        <file>icon/View Doc.ico</file>
+        <file>icon/view.ico</file>
+        <file>icon/warning.ico</file>
+        <file>icon/wrench.ico</file>
+        <file>icon/Write.ico</file>
+        <file>icon/yes.ico</file>
+        <file>icon/zoom.ico</file>
+    </qresource>
+</RCC>

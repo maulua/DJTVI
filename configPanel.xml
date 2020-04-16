@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ConfigurePanel>
+	<Variable Name="HorizScanRate" Value="7924.000000"/>
+	<Variable Name="VertScanRate" Value="41.904800"/>
+	<Variable Name="SamplesPerLine" Value="214.000000"/>
+	<Variable Name="DataRate" Value="106000.000000"/>
+	<Variable Name="SampleRate" Value="1694920.000000"/>
+	<Variable Name="USRPCenterFrequency" Value="70000000.000000"/>
+	<Variable Name="USRPGain" Value="0.000000"/>
+	<Variable Name="SamplesPerBit" Value="15.989800"/>
+	<Variable Name="InitFetchFactor" Value="5.000000"/>
+	<Variable Name="TimePerLine" Value="0.000126"/>
+	<Variable Name="TimePerFrame" Value="0.023864"/>
+	<Variable Name="LinePerFrame" Value="189.000000"/>
+	<Variable Name="SoFCode" Value="ce1a917d"/>
+	<Variable Name="CoercedRate" Value="1694920.000000"/>
+	<Variable Name="NumberCodeSamples" Value="255.837000"/>
+	<Variable Name="NumberFrontPorchSamples" Value="50.000000"/>
+	<Variable Name="NumberBackPorchSamples" Value="60.000000"/>
+	<Variable Name="SamplePerFrame" Value="40446.000000"/>
+	<Variable Name="InitFetchSize" Value="1070.000000"/>
+	<Variable Name="DeviceIPs" Value="192.168.1.1;192.168.2.1"/>
+</ConfigurePanel>
