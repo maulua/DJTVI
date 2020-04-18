@@ -28,6 +28,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+public slots:
+    void generateRandomData();
 
 private slots:
     void showConfigPanelWidget();
@@ -56,7 +58,6 @@ private:
 
 
 private:
-    QMutex m_mutex;
     Ui::MainWindow *ui;
     ConfigurationPanel configPanel;
     ConfigurationPanelWidget* configPanelWidget;
@@ -64,9 +65,10 @@ private:
     IntensityWidget* IWidget;
     IntensityDrawer drawer;
     DataAnalyzerThread *dataThread;
-    bool terminate;// = false;
+    bool stop;// = false;
     bool pause;//=false
-    QWaitCondition m_pauseCond;
+    bool terminate; //= false
+    std::complex<float>* data;
 
 };
 #endif // MAINWINDOW_H

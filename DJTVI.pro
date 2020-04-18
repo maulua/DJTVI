@@ -52,7 +52,7 @@ RESOURCES += \
 
 
 win32:CONFIG(release, debug|release): LIBS += -L'C:/Program Files/UHD/lib/' -luhd
-else:win32:CONFIG(debug, debug|release): LIBS += -L'C:/Program Files/UHD/lib/' -luhdd
+else:win32:CONFIG(debug, debug|release): LIBS += -L'C:/Program Files/UHD/lib/' -luhd
 else:unix: LIBS += -L'C:/Program Files/UHD/lib/' -luhd
 
 INCLUDEPATH += 'C:/Program Files/UHD/include'
@@ -60,7 +60,7 @@ DEPENDPATH += 'C:/Program Files/UHD/include'
 INCLUDEPATH +='C:/Users/Ngan/Downloads/alglib-3.16.0.cpp.gpl/cpp/src'
 
 win32:CONFIG(release, debug|release): LIBS += -LC:/local/boost_1_72_0/lib64-msvc-14.1/ -llibboost_thread-vc141-mt-x64-1_72
-else:win32:CONFIG(debug, debug|release): LIBS += -LC:/local/boost_1_72_0/lib64-msvc-14.1/ -llibboost_thread-vc141-mt-x64-1_72d
+else:win32:CONFIG(debug, debug|release): LIBS += -LC:/local/boost_1_72_0/lib64-msvc-14.1/ -llibboost_thread-vc141-mt-x64-1_72
 else:unix: LIBS += -LC:/local/boost_1_72_0/lib64-msvc-14.1/ -llibboost_thread-vc141-mt-x64-1_72
 
 INCLUDEPATH += C:/local/boost_1_72_0

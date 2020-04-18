@@ -6,9 +6,9 @@ DataAnalyzerThread::DataAnalyzerThread(QSize frameSizeIn, const QByteArray &SoF,
     m_phaseData(QByteArray()),
     m_SoFMatcher(SoF),
     m_frameSize(frameSizeIn),
-    m_maxDataSize(90000),
+    m_maxDataSize(9000000),
     m_maxVal(0),
-    m_terminate(false),
+    m_stop(false),
     m_pause(false)
 {
 
@@ -19,16 +19,17 @@ DataAnalyzerThread::~DataAnalyzerThread()
 {
     qDebug()<<"Destroying thread...";
     m_sync.lock();
-    m_terminate = true;
+    m_stop = true;
+    m_pause = false;
     m_sync.unlock();
     m_pauseCond.wakeAll();
-
     quit();
     wait();
 }
 
 void DataAnalyzerThread::addData(std::complex<float> *data, size_t size)
 {
+    qDebug()<<"Adding data.....";
     QVector<float> magnitudeData = QVector<float>();
     QByteArray phaseData = QByteArray();
     float maxVal = 0;
@@ -42,7 +43,21 @@ void DataAnalyzerThread::addData(std::complex<float> *data, size_t size)
     m_magnitudeData.append(magnitudeData);
     m_phaseData.append(phaseData);
     m_maxVal = qMax(m_maxVal, maxVal);
+    if (m_pause)
+    {
+        //m_pauseCond.wakeAll();
+        //Truncate data if size is too large
+        if (m_magnitudeData.size() > 2*m_maxDataSize)
+        {
+            {
+                m_magnitudeData = m_magnitudeData.mid(m_magnitudeData.size() - m_maxDataSize, m_maxDataSize);
+                m_phaseData = m_phaseData.mid(m_magnitudeData.size() - m_maxDataSize, m_maxDataSize);
+            }
+        }
+    }
+    qDebug()<<"My size: "<<m_magnitudeData.size();
     //Truncate data if overflow
+
     m_sync.unlock();
     emit addNewFrame();
 }
@@ -62,10 +77,12 @@ void DataAnalyzerThread::resume()
     m_pauseCond.wakeAll();
 }
 
-void DataAnalyzerThread::terminate()
+void DataAnalyzerThread::stop()
 {
+    qDebug()<<"Terminate called from analyzer thread....";
     m_sync.lock();
-    m_terminate = true;
+    m_stop = true;
+    m_pause = false;
     m_sync.unlock();
     m_pauseCond.wakeAll();
 }
@@ -95,40 +112,66 @@ void DataAnalyzerThread::run()
     QVector<float> magnitudeData;
     int pos = 0;
     float max;
+    m_pause = false;
+    m_stop = false;
 
     forever
     {
-        m_sync.lock();
+
+        //If pause, wait until resume
         if (m_pause)
-            m_pauseCond.wait(&m_sync);
-        if (m_terminate)
         {
-            qDebug()<<"Terminating........";
+            m_sync.lock();
+            m_pauseCond.wait(&m_sync);
+            m_sync.unlock();
+        }
+
+        //If stop, terminate the process and clear all data
+        if (m_stop)
+        {
+            m_sync.lock();
+            {
+                qDebug()<<"Terminating........";
+                m_magnitudeData.clear();
+                m_phaseData.clear();
+                m_maxVal = 0;
+                m_pause = false;
+            }
             m_sync.unlock();
             m_pauseCond.wakeAll();
             return;
         }
 
-        //If data is still large, then remove the extra data
-        if (m_magnitudeData.size() > m_maxDataSize)
-        {
-            qDebug()<<"Truncate data outside";
-            m_magnitudeData = m_magnitudeData.mid(m_magnitudeData.size() - m_maxDataSize, m_maxDataSize);
-            m_phaseData = m_phaseData.mid(m_magnitudeData.size() - m_maxDataSize, m_maxDataSize);
-        }
-        else if (m_magnitudeData.size() < samplePerFrame)
-        {
-            m_sync.unlock();
-            continue;
-        }
 
-        //Check data size
-        phaseData = m_phaseData;
-        magnitudeData = m_magnitudeData;
-        max = m_maxVal;
+        //Copy data to local data
+        m_sync.lock();
+        {
+            phaseData = m_phaseData;
+            magnitudeData = m_magnitudeData;
+            max = m_maxVal;
+        }
         m_sync.unlock();
-        //find position start of frame
 
+        //Truncate data if size is too large
+        if (phaseData.size() > m_maxDataSize)
+        {
+            m_sync.lock();
+            {
+                m_magnitudeData = m_magnitudeData.mid(m_magnitudeData.size() - m_maxDataSize, m_maxDataSize);
+                m_phaseData = m_phaseData.mid(m_magnitudeData.size() - m_maxDataSize, m_maxDataSize);
+            }
+
+            phaseData = m_phaseData;
+            magnitudeData = m_magnitudeData;
+            m_sync.unlock();
+        }
+
+
+
+        if (magnitudeData.size() < samplePerFrame)
+            continue;
+
+        //Find the start of frame
         if ((pos = m_SoFMatcher.indexIn(phaseData, 0)) != -1)
         {
             //Size is small, do nothing
@@ -141,19 +184,19 @@ void DataAnalyzerThread::run()
                 generatePicture(max, buffer);
                 //truncate the data that is generated
                 m_sync.lock();
-                m_magnitudeData.remove(0, pos + samplePerFrame);
-                m_phaseData.remove(0, pos + samplePerFrame);
-
-                //If data is still large, then remove the extra data
-                if (m_magnitudeData.size() > m_maxDataSize)
                 {
-                    qDebug()<<"Truncate data inside";
-                    m_magnitudeData = m_magnitudeData.mid(m_magnitudeData.size() - m_maxDataSize, m_maxDataSize);
-                    m_phaseData = m_phaseData.mid(m_magnitudeData.size() - m_maxDataSize, m_maxDataSize);
+                    m_magnitudeData.remove(0, pos + samplePerFrame);
+                    m_phaseData.remove(0, pos + samplePerFrame);
+
+                    //If data is still large, then remove the extra data
+                    if (m_magnitudeData.size() > m_maxDataSize)
+                    {
+                        m_magnitudeData = m_magnitudeData.mid(m_magnitudeData.size() - m_maxDataSize, m_maxDataSize);
+                        m_phaseData = m_phaseData.mid(m_magnitudeData.size() - m_maxDataSize, m_maxDataSize);
+                    }
                 }
-
                 m_sync.unlock();
-
+                qDebug()<<"Found frame....";
                 emit foundStartOfFrame();
             }
         }
@@ -162,12 +205,14 @@ void DataAnalyzerThread::run()
             //No sof found, so the whole data is junk
             //for data integrity, only parts of data is remove because m_magnitude data might be changed during the operation
             m_sync.lock();
-
-            //Remove only magnitude data that is invalid
-            m_magnitudeData.remove(0, magnitudeData.size());
-            m_phaseData.remove(0, magnitudeData.size());
+            {
+                qDebug()<<"Remove internal.....";
+                //Remove only magnitude data that is invalid
+                m_magnitudeData.remove(0, magnitudeData.size());
+                m_phaseData.remove(0, magnitudeData.size());
+            }
             m_sync.unlock();
         }
-        msleep(10);
+//        msleep(100);
     }
 }

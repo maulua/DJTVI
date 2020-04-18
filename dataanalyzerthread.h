@@ -19,7 +19,7 @@ public:
 
     void pause();
     void resume();
-    void terminate();
+    void stop();
     void generatePicture(const float& maxVal, const QVector<float>& dataIn);
 
 signals:
@@ -38,10 +38,10 @@ private:
     QSize m_frameSize;
     int m_maxDataSize;
     float m_maxVal;
-    bool m_terminate;
 
     QWaitCondition m_pauseCond;
     bool m_pause;
+    bool m_stop;
 
 
 

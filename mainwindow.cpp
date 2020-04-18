@@ -5,6 +5,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , pause(false)
+    , stop(false)
     , terminate(false)
 {
     ui->setupUi(this);
@@ -19,13 +20,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(dataThread, &DataAnalyzerThread::sendImage, IWidget, &IntensityWidget::SetImage);
     connect(dataThread, &DataAnalyzerThread::foundStartOfFrame, this, &MainWindow::StartOfFrameFound);
     connect(dataThread, &DataAnalyzerThread::addNewFrame, this, &MainWindow::AddNewFrame);
-    connect(this, &QMainWindow::destroyed, dataThread, &QThread::deleteLater);
 }
 
 MainWindow::~MainWindow()
 {
     qDebug()<<"Destroying window...";
-    terminate = true;
+    stop = true;
     deleteLater();
     delete ui;
 
@@ -80,48 +80,19 @@ void MainWindow::StartModel()
     double freq = configPanel.m_Data.USRPCenterFreq;
     double dataRate = configPanel.m_Data.DataRate;
     double gain = configPanel.m_Data.USRPGain;
-    //Need to set antena
-    QString antenna = "RX2";
 
-    //Need to have reference clock
-    QString ref = "internal";
-
-    //Don't have to set bandwidth
-    //Allow sometimes for setup connection between Radio and host
-    const int setupTime = 60000; //miliseconds
-
-    //Receive type: float
-    QString type = "float";
-
-    std::complex<float>* data = new std::complex<float>[3000];
-    //dataThread->resume();
-    dataThread->start();
-
-    static int j = 0;
-    static int i = 0;
-
-    for(; j < 100000; j++)
+    data = new std::complex<float>[3000];
+    if (pause)
+        dataThread->resume();
+    else
     {
-        for(; i < 3000; i++)
-        {
-            if (i < 107)
-                *(data + i) = std::complex<float>(1, 1);
-            else
-                *(data+i) = std::complex<float>(qrand(), qrand());
-            if (terminate)
-            {
-                QApplication::processEvents();
-                return;
-            }
-        }
-
-        dataThread->addData(data, 3000);
-        qApp->processEvents();
-        //QThread::msleep(100);
-
+        dataThread->start();
+        QMetaObject::invokeMethod(this, "generateRandomData", Qt::QueuedConnection);
     }
-    i = 0;
-    j = 0;
+
+    stop = false;
+    pause = false;
+
 }
 
 void MainWindow::PauseModel()
@@ -130,8 +101,7 @@ void MainWindow::PauseModel()
     ui->actionStart->setEnabled(true);
     ui->actionPause->setEnabled(false);
     ui->actionStop->setEnabled(true);
-    if (dataThread)
-        dataThread->pause();
+    pause = true;
 }
 
 void MainWindow::StopModel()
@@ -140,9 +110,7 @@ void MainWindow::StopModel()
     ui->actionStart->setEnabled(true);
     ui->actionPause->setEnabled(false);
     ui->actionStop->setEnabled(false);
-    terminate = true;
-    if (dataThread)
-        dataThread->terminate();
+    stop = true;
 }
 
 void MainWindow::StartOfFrameFound()
@@ -282,7 +250,47 @@ void MainWindow::LoadImage(QImage &image)
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     qDebug()<<"Terminate event.......................********************";
-    terminate = true;
+    stop = true;
+}
+
+void MainWindow::generateRandomData()
+{
+    static int i = 0;
+    static int j = 0;
+
+    if (j >= 1000)
+    {
+        i = 0;
+        j = 0;
+        ui->actionStart->setEnabled(true);
+        ui->actionStop->setEnabled(false);
+        ui->actionPause->setEnabled(false);
+        return;
+    }
+    while (i < 3000)
+    {
+        if (i < 107)
+            *(data + i) = std::complex<float>(1, 1);
+        else
+            *(data+i) = std::complex<float>(qrand(), qrand());
+        if (stop)
+        {
+            dataThread->stop();
+            return;
+        }
+        if (pause)
+        {
+            dataThread->pause();
+            //return;
+        }
+        i++;
+
+    }
+    i = 0;
+    j++;
+    dataThread->addData(data, 3000);
+    qDebug()<<"Sending sample "<<j;
+    QMetaObject::invokeMethod(this, "generateRandomData", Qt::QueuedConnection);
 }
 
 
