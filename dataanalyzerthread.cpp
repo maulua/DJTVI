@@ -9,15 +9,15 @@ DataAnalyzerThread::DataAnalyzerThread(QSize frameSizeIn, const QByteArray &SoF,
     m_maxDataSize(9000000),
     m_maxVal(0),
     m_stop(false),
-    m_pause(false)
+    m_pause(false),
+    m_complete(false)
 {
-
-    qDebug()<<"Search str: "<<SoF;
+    qDebug()<<"Start Data Analyzer Thread.....";
 }
 
 DataAnalyzerThread::~DataAnalyzerThread()
 {
-    qDebug()<<"Destroying thread...";
+    qDebug()<<"Destroying Data Analyzer Thread...";
     m_sync.lock();
     m_stop = true;
     m_pause = false;
@@ -29,7 +29,6 @@ DataAnalyzerThread::~DataAnalyzerThread()
 
 void DataAnalyzerThread::addData(std::complex<float> *data, size_t size)
 {
-    qDebug()<<"Adding data.....";
     QVector<float> magnitudeData = QVector<float>();
     QByteArray phaseData = QByteArray();
     float maxVal = 0;
@@ -47,7 +46,7 @@ void DataAnalyzerThread::addData(std::complex<float> *data, size_t size)
     {
         //m_pauseCond.wakeAll();
         //Truncate data if size is too large
-        if (m_magnitudeData.size() > 2*m_maxDataSize)
+        if (m_magnitudeData.size() > m_maxDataSize)
         {
             {
                 m_magnitudeData = m_magnitudeData.mid(m_magnitudeData.size() - m_maxDataSize, m_maxDataSize);
@@ -55,9 +54,6 @@ void DataAnalyzerThread::addData(std::complex<float> *data, size_t size)
             }
         }
     }
-    qDebug()<<"My size: "<<m_magnitudeData.size();
-    //Truncate data if overflow
-
     m_sync.unlock();
     emit addNewFrame();
 }
@@ -66,26 +62,42 @@ void DataAnalyzerThread::pause()
 {
     m_sync.lock();
     m_pause = true;
+    m_stop = false;
+    m_complete = false;
     m_sync.unlock();
 }
 
 void DataAnalyzerThread::resume()
 {
     m_sync.lock();
-    m_pause = false;
+    if (m_pause)
+    {
+        m_pause = false;
+        m_stop = false;
+        m_complete =false;
+        m_pauseCond.wakeAll();
+    }
     m_sync.unlock();
-    m_pauseCond.wakeAll();
 }
 
 void DataAnalyzerThread::stop()
 {
-    qDebug()<<"Terminate called from analyzer thread....";
     m_sync.lock();
     m_stop = true;
     m_pause = false;
+    m_complete = false;
     m_sync.unlock();
-    m_pauseCond.wakeAll();
 }
+
+void DataAnalyzerThread::complete()
+{
+    m_sync.lock();
+    m_complete = true;
+    m_stop = false;
+    m_pause = false;
+    m_sync.unlock();
+}
+
 
 void DataAnalyzerThread::generatePicture(const float &maxVal, const QVector<float> &dataIn)
 {
@@ -112,34 +124,44 @@ void DataAnalyzerThread::run()
     QVector<float> magnitudeData;
     int pos = 0;
     float max;
-    m_pause = false;
-    m_stop = false;
+
+    m_sync.lock();
+    {
+        m_pause = false;
+        m_stop = false;
+        m_magnitudeData.clear();
+        m_phaseData.clear();
+        m_pauseCond.wakeAll();
+        m_maxVal = 0;
+        m_complete = false;
+    }
+    m_sync.unlock();
 
     forever
     {
+        bool stop;
+        bool pause;
+        bool complete;
+
+        m_sync.lock();
+        stop = m_stop;
+        pause = m_pause;
+        complete = m_complete;
+        m_sync.unlock();
+
+        //If stop, terminate the process and clear all data
+        if (stop)
+        {
+            m_pauseCond.wakeAll();
+            return;
+        }
 
         //If pause, wait until resume
-        if (m_pause)
+        if (pause)
         {
             m_sync.lock();
             m_pauseCond.wait(&m_sync);
             m_sync.unlock();
-        }
-
-        //If stop, terminate the process and clear all data
-        if (m_stop)
-        {
-            m_sync.lock();
-            {
-                qDebug()<<"Terminating........";
-                m_magnitudeData.clear();
-                m_phaseData.clear();
-                m_maxVal = 0;
-                m_pause = false;
-            }
-            m_sync.unlock();
-            m_pauseCond.wakeAll();
-            return;
         }
 
 
@@ -152,24 +174,31 @@ void DataAnalyzerThread::run()
         }
         m_sync.unlock();
 
-        //Truncate data if size is too large
-        if (phaseData.size() > m_maxDataSize)
+        if (complete)
         {
-            m_sync.lock();
+            if (magnitudeData.size() < samplePerFrame)
             {
-                m_magnitudeData = m_magnitudeData.mid(m_magnitudeData.size() - m_maxDataSize, m_maxDataSize);
-                m_phaseData = m_phaseData.mid(m_magnitudeData.size() - m_maxDataSize, m_maxDataSize);
+                m_pauseCond.wakeAll();
+                return;
             }
-
-            phaseData = m_phaseData;
-            magnitudeData = m_magnitudeData;
-            m_sync.unlock();
         }
 
 
+//        //Truncate data if size is too large
+//        if (phaseData.size() > m_maxDataSize)
+//        {
+//            m_sync.lock();
+//            {
+//                m_magnitudeData = m_magnitudeData.mid(m_magnitudeData.size() - m_maxDataSize, m_maxDataSize);
+//                m_phaseData = m_phaseData.mid(m_magnitudeData.size() - m_maxDataSize, m_maxDataSize);
+//            }
 
-        if (magnitudeData.size() < samplePerFrame)
-            continue;
+//            phaseData = m_phaseData;
+//            magnitudeData = m_magnitudeData;
+//            m_sync.unlock();
+//        }
+
+
 
         //Find the start of frame
         if ((pos = m_SoFMatcher.indexIn(phaseData, 0)) != -1)
@@ -177,6 +206,7 @@ void DataAnalyzerThread::run()
             //Size is small, do nothing
             if (magnitudeData.size() - pos < samplePerFrame)
             {
+                continue;
             }
             else
             {
@@ -196,7 +226,6 @@ void DataAnalyzerThread::run()
                     }
                 }
                 m_sync.unlock();
-                qDebug()<<"Found frame....";
                 emit foundStartOfFrame();
             }
         }

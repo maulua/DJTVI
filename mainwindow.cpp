@@ -5,7 +5,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , pause(false)
-    , stop(false)
+    , stop(true)
     , terminate(false)
 {
     ui->setupUi(this);
@@ -20,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(dataThread, &DataAnalyzerThread::sendImage, IWidget, &IntensityWidget::SetImage);
     connect(dataThread, &DataAnalyzerThread::foundStartOfFrame, this, &MainWindow::StartOfFrameFound);
     connect(dataThread, &DataAnalyzerThread::addNewFrame, this, &MainWindow::AddNewFrame);
+    connect(dataThread, &DataAnalyzerThread::finished, this, &MainWindow::CompleteDataAnalyzer);
 }
 
 MainWindow::~MainWindow()
@@ -70,29 +71,18 @@ void MainWindow::UpdateConfigPanel()
 
 void MainWindow::StartModel()
 {
-    qDebug()<<"Start Model....";
+    //If current thread is pause, then continue the thread
+    if (pause)
+    {
+        ResumeModel();
+    }
+    else
+        StartNewModel();
+    pause = false;
+    stop = false;
     ui->actionPause->setEnabled(true);
     ui->actionStop->setEnabled(true);
     ui->actionStart->setEnabled(false);
-
-    QHostAddress radioIp = configPanel.m_Data.HostAddresses.first();
-    QHostAddress hostIp = configPanel.m_Data.HostAddresses.last();
-    double freq = configPanel.m_Data.USRPCenterFreq;
-    double dataRate = configPanel.m_Data.DataRate;
-    double gain = configPanel.m_Data.USRPGain;
-
-    data = new std::complex<float>[3000];
-    if (pause)
-        dataThread->resume();
-    else
-    {
-        dataThread->start();
-        QMetaObject::invokeMethod(this, "generateRandomData", Qt::QueuedConnection);
-    }
-
-    stop = false;
-    pause = false;
-
 }
 
 void MainWindow::PauseModel()
@@ -102,6 +92,9 @@ void MainWindow::PauseModel()
     ui->actionPause->setEnabled(false);
     ui->actionStop->setEnabled(true);
     pause = true;
+    stop =false;
+    dataThread->pause();
+
 }
 
 void MainWindow::StopModel()
@@ -111,6 +104,9 @@ void MainWindow::StopModel()
     ui->actionPause->setEnabled(false);
     ui->actionStop->setEnabled(false);
     stop = true;
+    pause = false;
+    dataThread->stop();
+
 }
 
 void MainWindow::StartOfFrameFound()
@@ -123,6 +119,16 @@ void MainWindow::AddNewFrame()
 {
     QLabel *label = ui->sofFoundIndicatorLabel;
     label->setStyleSheet("QLabel{background-color: yellow; color: yellow;}");
+}
+
+void MainWindow::CompleteDataAnalyzer()
+{
+    qDebug()<<"Complete data analyzer thread....";
+    stop = false;
+    pause =false;
+    ui->actionStart->setEnabled(true);
+    ui->actionPause->setEnabled(false);
+    ui->actionStop->setEnabled(false);
 }
 
 
@@ -250,7 +256,145 @@ void MainWindow::LoadImage(QImage &image)
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     qDebug()<<"Terminate event.......................********************";
-    stop = true;
+    StopModel();
+}
+
+void MainWindow::ResumeModel()
+{
+    dataThread->resume();
+}
+
+void MainWindow::StartNewModel()
+{
+    testFunction();
+    return;
+//    qDebug()<<"Start Model....";
+
+//    QHostAddress radioIp = configPanel.m_Data.HostAddresses.first();
+//    QHostAddress hostIp = configPanel.m_Data.HostAddresses.last();
+//    double freq = configPanel.m_Data.USRPCenterFreq;
+//    double dataRate = configPanel.m_Data.DataRate;
+//    double gain = configPanel.m_Data.USRPGain;
+//    double bandwidth = 1e6;
+
+
+//    data = new std::complex<float>[3000];
+//    dataThread->start();
+
+//    std::string device_args("addr=192.168.10.2");
+
+//    uhd::set_thread_priority_safe();
+
+//    //Make USRP
+//    uhd::usrp::multi_usrp::sptr usrp = uhd::usrp::multi_usrp::make(device_args);
+
+//    //Set Clock
+//    usrp->set_clock_source("internal");
+
+//    //SubDevice
+//    std::string subdev("A:0");
+//    qDebug()<<"Set sub device: "<<QString::fromStdString(subdev);
+//    usrp->set_rx_subdev_spec(subdev);
+//    qDebug()<<"Sub device: "<<QString::fromStdString(usrp->get_pp_string().c_str());
+
+//    //Rx rate
+//    if (dataRate <= 0)
+//    {
+//        qWarning()<<"Invalid data rate...";
+//        return;
+//    }
+//    qDebug()<<"Setting rx rate";
+//    usrp->set_rx_rate(dataRate);
+//    qDebug()<<"Rx rate: "<<usrp->get_rx_freq();
+
+//    //Rx frequency
+//    qDebug()<<"Set rx freq: ";
+//    usrp->set_tx_freq(uhd::tune_request_t(freq));
+//    qDebug()<<"Freq: "<<usrp->get_rx_freq();
+
+//    // set the rf gain
+//    qDebug()<<"Set RF gain: ";
+//    usrp->set_rx_gain(gain);
+//    qDebug()<<"Rf gain: "<<usrp->get_rx_gain();
+
+//    // set the IF filter bandwidth
+//    qDebug()<<"Setting RX Bandwidth: "<< bandwidth;
+//    usrp->set_rx_bandwidth(bandwidth);
+//    qDebug()<<"Bandwidth: "<<usrp->get_rx_bandwidth();
+
+//    // set the antenna
+//    qDebug()<<"Set rx antena...";
+//    std::string ant("TX/RX");
+//    usrp->set_rx_antenna(ant);
+//    qDebug()<<"RX antenna: "<<QString::fromStdString(usrp->get_rx_antenna());
+
+
+
+
+
+
+    //QMetaObject::invokeMethod(this, "generateRandomData", Qt::QueuedConnection);
+}
+
+void MainWindow::testFunction()
+{
+    uhd::set_thread_priority_safe();
+
+    std::string device_args("addr=192.168.10.2");
+    std::string subdev("A:0");
+    std::string ant("TX/RX");
+    std::string ref("internal");
+
+    double rate(1e6);
+    double freq(915e6);
+    double gain(10);
+    double bw(1e6);
+
+    //create a usrp device
+    std::cout << std::endl;
+    std::cout << boost::format("Creating the usrp device with: %s...") % device_args << std::endl;
+//    uhd::usrp::multi_usrp::sptr usrp = uhd::usrp::multi_usrp::make(device_args);
+
+//    // Lock mboard clocks
+//    std::cout << boost::format("Lock mboard clocks: %f") % ref << std::endl;
+//    usrp->set_clock_source(ref);
+
+//    //always select the subdevice first, the channel mapping affects the other settings
+//    std::cout << boost::format("subdev set to: %f") % subdev << std::endl;
+//    usrp->set_rx_subdev_spec(subdev);
+//    std::cout << boost::format("Using Device: %s") % usrp->get_pp_string() << std::endl;
+
+//    //set the sample rate
+//    if (rate <= 0.0) {
+//        std::cerr << "Please specify a valid sample rate" << std::endl;
+//        return;
+//    }
+
+//    // set sample rate
+//    std::cout << boost::format("Setting RX Rate: %f Msps...") % (rate / 1e6) << std::endl;
+//    usrp->set_rx_rate(rate);
+//    std::cout << boost::format("Actual RX Rate: %f Msps...") % (usrp->get_rx_rate() / 1e6) << std::endl << std::endl;
+
+//    // set freq
+//    std::cout << boost::format("Setting RX Freq: %f MHz...") % (freq / 1e6) << std::endl;
+//    uhd::tune_request_t tune_request(freq);
+//    usrp->set_rx_freq(tune_request);
+//    std::cout << boost::format("Actual RX Freq: %f MHz...") % (usrp->get_rx_freq() / 1e6) << std::endl << std::endl;
+
+//    // set the rf gain
+//    std::cout << boost::format("Setting RX Gain: %f dB...") % gain << std::endl;
+//    usrp->set_rx_gain(gain);
+//    std::cout << boost::format("Actual RX Gain: %f dB...") % usrp->get_rx_gain() << std::endl << std::endl;
+
+//    // set the IF filter bandwidth
+//    std::cout << boost::format("Setting RX Bandwidth: %f MHz...") % (bw / 1e6) << std::endl;
+//    usrp->set_rx_bandwidth(bw);
+//    std::cout << boost::format("Actual RX Bandwidth: %f MHz...") % (usrp->get_rx_bandwidth() / 1e6) << std::endl << std::endl;
+
+//    // set the antenna
+//    std::cout << boost::format("Setting RX Antenna: %s") % ant << std::endl;
+//    usrp->set_rx_antenna(ant);
+//    std::cout << boost::format("Actual RX Antenna: %s") % usrp->get_rx_antenna() << std::endl << std::endl;
 }
 
 void MainWindow::generateRandomData()
@@ -265,6 +409,13 @@ void MainWindow::generateRandomData()
         ui->actionStart->setEnabled(true);
         ui->actionStop->setEnabled(false);
         ui->actionPause->setEnabled(false);
+        dataThread->complete();
+
+        if (!pause)
+        {
+            stop = true;
+            pause = false;
+        }
         return;
     }
     while (i < 3000)
@@ -275,12 +426,12 @@ void MainWindow::generateRandomData()
             *(data+i) = std::complex<float>(qrand(), qrand());
         if (stop)
         {
-            dataThread->stop();
+            i = 0;
+            j = 0;
             return;
         }
         if (pause)
         {
-            dataThread->pause();
             //return;
         }
         i++;

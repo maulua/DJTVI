@@ -20,6 +20,7 @@ public:
     void pause();
     void resume();
     void stop();
+    void complete();
     void generatePicture(const float& maxVal, const QVector<float>& dataIn);
 
 signals:
@@ -36,12 +37,13 @@ private:
     QMutex m_sync;
     QByteArrayMatcher m_SoFMatcher;
     QSize m_frameSize;
-    int m_maxDataSize;
+    const int m_maxDataSize;
     float m_maxVal;
 
     QWaitCondition m_pauseCond;
     bool m_pause;
     bool m_stop;
+    bool m_complete;
 
 
 

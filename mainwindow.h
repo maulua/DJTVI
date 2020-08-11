@@ -3,6 +3,14 @@
 
 #include "common.h"
 #include <uhd.h>
+#include <uhd/utils/thread_priority.hpp>
+#include <uhd/utils/safe_main.hpp>
+#include <uhd/usrp/multi_usrp.hpp>
+#include <uhd/exception.hpp>
+#include <uhd/types/tune_request.hpp>
+#include <boost/program_options.hpp>
+#include <boost/format.hpp>
+#include <boost/thread.hpp>
 
 
 #include "intensitywidget.h"
@@ -40,6 +48,7 @@ private slots:
     void StopModel();
     void StartOfFrameFound();
     void AddNewFrame();
+    void CompleteDataAnalyzer();
 
 
     void on_expandingConfigBtn_clicked();
@@ -54,6 +63,9 @@ private:
     void OpenImage();
     void LoadImage(QImage& image);
     void closeEvent(QCloseEvent *event) override;
+    void ResumeModel();
+    void StartNewModel();
+    void testFunction();
 
 
 
